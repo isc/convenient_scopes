@@ -1,0 +1,1 @@
+require 'convenient_scopes'
