@@ -1,6 +1,6 @@
 require 'helper'
 
-class TestConvenientScopes < Test::Unit::TestCase
+class TestConditions < Test::Unit::TestCase
   context "Given two users" do
     setup do
       @bob = User.create :pseudo => 'Bob', :first_name => 'Robert', :age => 37, :activated_at => 37.hours.ago, :admin => true
@@ -14,6 +14,10 @@ class TestConvenientScopes < Test::Unit::TestCase
       assert_equal [@bob], User.pseudo_eq('Bob')
       assert_equal [@slim], User.pseudo_is('Slim')
       assert_equal [@bob], User.first_name_is('Robert')
+    end
+    
+    should "equals scope on a relation" do
+      assert_equal [@bob], User.order('age').pseudo_eq('Bob')
     end
     
     should "not equals scope" do

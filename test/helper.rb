@@ -9,6 +9,14 @@ require 'convenient_scopes'
 
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
 class User < ActiveRecord::Base
+  has_many :comments
+  belongs_to :group
+end
+class Group < ActiveRecord::Base
+  has_many :users
+end
+class Comment < ActiveRecord::Base
+  belongs_to :user
 end
 
 class Test::Unit::TestCase
@@ -22,8 +30,15 @@ ActiveRecord::Schema.verbose = false
 ActiveRecord::Schema.define(:version => 1) do
   create_table :users do |t|
     t.string :pseudo, :first_name, :last_name
-    t.integer :age
+    t.integer :group_id, :age
     t.datetime :activated_at
     t.boolean :admin
+  end
+  create_table :groups do |t|
+    t.string :name
+  end
+  create_table :comments do |t|
+    t.string :body
+    t.integer :user_id
   end
 end

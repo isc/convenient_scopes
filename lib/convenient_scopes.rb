@@ -1,10 +1,11 @@
 module ConvenientScopes
 
     def method_missing(name, *args, &block)
-      Conditions.instance_methods.each do |scope_type|
-        return send name, *args, &block if send scope_type.to_sym, name
+      if define_scope name
+        return send name, *args, &block
+      else
+        super
       end
-      super
     end
     
     module Conditions
@@ -86,6 +87,22 @@ module ConvenientScopes
     
     include Conditions
     
+    def association_scope name
+      assoc = reflect_on_all_associations.detect {|assoc| name.to_s.starts_with? assoc.name.to_s}
+      return unless assoc
+      next_scope = name.to_s.split("#{assoc.name}_").last
+      if assoc.klass.define_scope next_scope.clone
+        scope name, lambda {|value| joins(assoc.name).send(next_scope.to_sym, value)}
+      end
+    end
+    
+    def define_scope name
+      Conditions.instance_methods.each do |scope_type|
+        return true if send scope_type.to_sym, name
+      end
+      return association_scope name
+    end
+    
     def match_and_define_scope name, suffixes, sql_format, value_format = "%s"
       return unless (column = match_suffix_and_column_name name, suffixes)
       sql = sql_format % column
@@ -111,4 +128,5 @@ module ConvenientScopes
     end
 end
 
-ActiveRecord::Base.extend(ConvenientScopes)
+ActiveRecord::Base.extend ConvenientScopes
+ActiveRecord::Relation.send :include, ConvenientScopes
