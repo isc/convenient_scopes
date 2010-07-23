@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "convenient_scopes.gemspec",
      "lib/convenient_scopes.rb",
      "test/helper.rb",
      "test/test_convenient_scopes.rb"
