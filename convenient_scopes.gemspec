@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "convenient_scopes.gemspec",
+     "init.rb",
      "lib/convenient_scopes.rb",
      "test/helper.rb",
      "test/test_convenient_scopes.rb"
