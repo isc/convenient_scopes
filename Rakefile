@@ -12,6 +12,7 @@ begin
     gem.authors = ["Ivan Schneider"]
     gem.add_runtime_dependency "activerecord", ">= 3.0.0.beta4"
     gem.add_development_dependency "shoulda", ">= 0"
+    gem.add_development_dependency "sqlite3-ruby"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
