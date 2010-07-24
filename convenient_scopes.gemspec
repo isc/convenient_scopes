@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{convenient_scopes}
-  s.version = "0.1.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Ivan Schneider"]
@@ -26,7 +26,8 @@ Gem::Specification.new do |s|
      "convenient_scopes.gemspec",
      "lib/convenient_scopes.rb",
      "test/helper.rb",
-     "test/test_convenient_scopes.rb"
+     "test/test_associations.rb",
+     "test/test_conditions.rb"
   ]
   s.homepage = %q{http://github.com/isc/convenient_scopes}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -35,7 +36,8 @@ Gem::Specification.new do |s|
   s.summary = %q{Dynamic scopes by convention for ActiveRecord 3}
   s.test_files = [
     "test/helper.rb",
-     "test/test_convenient_scopes.rb"
+     "test/test_associations.rb",
+     "test/test_conditions.rb"
   ]
 
   if s.respond_to? :specification_version then
