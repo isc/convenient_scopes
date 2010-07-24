@@ -88,16 +88,49 @@ module ConvenientScopes
 
   include Conditions
 
+  module Ordering
+    
+    def ascend_by_scope name
+      ordering_scope name, /^ascend_by_/, 'asc'
+    end
+    
+    def descend_by_scope name
+      ordering_scope name, /^descend_by_/, 'desc'
+    end
+    
+  end
+  
+  def ordering_scope name, prefix, direction
+    str_name = name.to_s
+    return unless str_name.gsub!(prefix, '')
+    determine_order_scope_data str_name, direction
+  end
+  
+  def determine_order_scope_data name, direction
+    if column_names.include? name.to_s
+      order("#{quoted_table_name}.#{name} #{direction}")
+    elsif assoc = (possible_association_for_scope name)
+      next_scope = name.to_s.split("#{assoc.name}_").last.to_sym # age
+      scope_arg = assoc.klass.determine_order_scope_data next_scope, direction
+      scope_arg.is_a?(Array) ? [assoc.name] + scope_arg : [assoc.name, scope_arg] if scope_arg
+    end    
+  end
+  
+  include Ordering
+
   def association_scope name
-    assoc = reflect_on_all_associations.detect {|assoc| name.to_s.starts_with? assoc.name.to_s}
-    return unless assoc
+    return unless assoc = (possible_association_for_scope name)
     next_scope = name.to_s.split("#{assoc.name}_").last.to_sym
     scope_arg = (assoc.klass.define_scope next_scope) || assoc.klass.scopes[next_scope]
     scope_arg.is_a?(Array) ? [assoc.name] + scope_arg : [assoc.name, scope_arg] if scope_arg
   end
 
+  def possible_association_for_scope name
+    reflect_on_all_associations.detect {|assoc| name.to_s.starts_with? assoc.name.to_s}
+  end
+  
   def define_scope name
-    Conditions.instance_methods.each do |scope_type|
+    [Conditions, Ordering].map(&:instance_methods).flatten.each do |scope_type|
       if scope_arg = (send scope_type.to_sym, name)
         return scope_arg unless scope_arg.nil?
       end

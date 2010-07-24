@@ -42,9 +42,10 @@ class TestAssociations < Test::Unit::TestCase
       assert_equal [@dev_group], Group.users_comments_published
     end
     
-    should "a named scope on an association" do
+    should "be able to leverage a named scope on an association" do
       Comment.scope :recent, Comment.created_at_after(1.hour.ago).created_at_not_nil
       assert_equal [@slim], User.comments_recent
+      assert_equal [@dev_group], Group.users_comments_recent
     end
     
   end
