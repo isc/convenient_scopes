@@ -12,7 +12,7 @@ module ConvenientScopes
   module Conditions
 
     def equals_scope name
-      return unless (column = match_suffix_and_column_name name, %w(eq is equals))
+      return unless (column = match_suffix_and_column_name name, %w(equals eq is))
       lambda {|value| where(column => value)}
     end
 
@@ -91,10 +91,9 @@ module ConvenientScopes
   def association_scope name
     assoc = reflect_on_all_associations.detect {|assoc| name.to_s.starts_with? assoc.name.to_s}
     return unless assoc
-    next_scope = name.to_s.split("#{assoc.name}_").last
-    if scope_arg = (assoc.klass.define_scope next_scope.to_sym)
-      scope_arg.is_a?(Array) ? [assoc.name] + scope_arg : [assoc.name, scope_arg]
-    end
+    next_scope = name.to_s.split("#{assoc.name}_").last.to_sym
+    scope_arg = (assoc.klass.define_scope next_scope) || assoc.klass.scopes[next_scope]
+    scope_arg.is_a?(Array) ? [assoc.name] + scope_arg : [assoc.name, scope_arg] if scope_arg
   end
 
   def define_scope name
@@ -140,7 +139,7 @@ module ConvenientScopes
     if relation_or_proc.is_a? ActiveRecord::Relation
       relation_or_proc.joins joins_arg
     else
-      lambda {|value| relation_or_proc.call(value).joins joins_arg }
+      lambda {|*value| relation_or_proc.call(*value).joins joins_arg }
     end
   end
   
