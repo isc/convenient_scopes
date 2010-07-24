@@ -1,7 +1,8 @@
 module ConvenientScopes
 
     def method_missing(name, *args, &block)
-      if define_scope name
+      if scope_arg = (define_scope name)
+        scope name, scope_arg
         return send name, *args, &block
       else
         super
@@ -12,7 +13,7 @@ module ConvenientScopes
       
       def equals_scope name
         return unless (column = match_suffix_and_column_name name, %w(eq is equals))
-        scope name, lambda {|value| where(column => value)}
+        lambda {|value| where(column => value)}
       end
     
       def does_not_equal_scope name
@@ -72,7 +73,7 @@ module ConvenientScopes
       def boolean_column_scope name
         return unless column_names.include? name.to_s
         return unless boolean_column? name
-        scope name, where(name => true)
+        where(name => true)
       end
       
       def negative_boolean_column_scope name
@@ -80,7 +81,7 @@ module ConvenientScopes
         return unless str_name.gsub!(/^not_/, '')
         return unless column_names.include? str_name
         return unless boolean_column? str_name
-        scope name, where(str_name => false)
+        where(str_name => false)
       end
       
     end
@@ -91,28 +92,34 @@ module ConvenientScopes
       assoc = reflect_on_all_associations.detect {|assoc| name.to_s.starts_with? assoc.name.to_s}
       return unless assoc
       next_scope = name.to_s.split("#{assoc.name}_").last
-      if assoc.klass.define_scope next_scope.clone
-        scope name, lambda {|value| joins(assoc.name).send(next_scope.to_sym, value)}
+      if scope_arg = (assoc.klass.define_scope next_scope.to_sym)
+        if scope_arg.is_a? ActiveRecord::Relation
+          scope_arg.joins(assoc.name)
+        else
+          lambda {|value| scope_arg.call(value).joins(assoc.name) }
+        end
       end
     end
     
     def define_scope name
       Conditions.instance_methods.each do |scope_type|
-        return true if send scope_type.to_sym, name
+        if scope_arg = (send scope_type.to_sym, name)
+          return scope_arg unless scope_arg.nil?
+        end
       end
       return association_scope name
     end
     
-    def match_and_define_scope name, suffixes, sql_format, value_format = "%s"
+    def match_and_define_scope name, suffixes, sql_format, value_format = nil
       return unless (column = match_suffix_and_column_name name, suffixes)
-      sql = sql_format % column
-      scope name, lambda {|value| where([sql, value_format % value])}
+      sql = sql_format % "#{quoted_table_name}.#{column}"
+      lambda {|value| where([sql, value_format ? (value_format % value) : value])}
     end
     
     def match_and_define_scope_without_value name, suffixes, sql_format
       return unless (column = match_suffix_and_column_name name, suffixes)
-      sql = sql_format % column
-      scope name, where(sql)
+      sql = sql_format % "#{quoted_table_name}.#{column}"
+      where(sql)
     end
     
     def match_suffix_and_column_name name, suffixes

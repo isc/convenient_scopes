@@ -33,12 +33,16 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer :group_id, :age
     t.datetime :activated_at
     t.boolean :admin
+    t.timestamps
   end
   create_table :groups do |t|
     t.string :name
+    t.timestamps
   end
   create_table :comments do |t|
     t.string :body
     t.integer :user_id
+    t.boolean :published
+    t.timestamps
   end
 end

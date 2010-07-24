@@ -3,8 +3,10 @@ require 'helper'
 class TestConditions < Test::Unit::TestCase
   context "Given two users" do
     setup do
-      @bob = User.create :pseudo => 'Bob', :first_name => 'Robert', :age => 37, :activated_at => 37.hours.ago, :admin => true
-      @slim = User.create :pseudo => 'Slim', :first_name => 'Angelo', :age => 12, :activated_at => nil, :admin => false
+      @bob = User.create :pseudo => 'Bob', :first_name => 'Robert', :age => 37,
+        :activated_at => 37.hours.ago, :admin => true
+      @slim = User.create :pseudo => 'Slim', :first_name => 'Angelo', :age => 12,
+        :activated_at => nil, :admin => false
     end
     
     should "equals scope" do
@@ -33,6 +35,7 @@ class TestConditions < Test::Unit::TestCase
     should "greater than (or equal)? scope" do
       assert_equal [@bob], User.age_greater_than(12)
       assert_equal [@bob], User.age_gte(37)
+      assert_equal [@bob], User.activated_at_after(40.hours.ago)
     end
     
     should "like scope" do
