@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{convenient_scopes}
-  s.version = "0.3.0"
+  s.version = "0.4.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Ivan Schneider"]
-  s.date = %q{2010-07-24}
+  s.date = %q{2010-07-25}
   s.description = %q{Dynamic scopes by convention for ActiveRecord 3}
   s.email = %q{isc@massivebraingames.com}
   s.extra_rdoc_files = [
@@ -27,7 +27,8 @@ Gem::Specification.new do |s|
      "lib/convenient_scopes.rb",
      "test/helper.rb",
      "test/test_associations.rb",
-     "test/test_conditions.rb"
+     "test/test_conditions.rb",
+     "test/test_ordering.rb"
   ]
   s.homepage = %q{http://github.com/isc/convenient_scopes}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -36,8 +37,10 @@ Gem::Specification.new do |s|
   s.summary = %q{Dynamic scopes by convention for ActiveRecord 3}
   s.test_files = [
     "test/helper.rb",
+     "test/test_all_and_any_conditions.rb",
      "test/test_associations.rb",
-     "test/test_conditions.rb"
+     "test/test_conditions.rb",
+     "test/test_ordering.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -45,12 +48,18 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<activerecord>, [">= 3.0.0.beta4"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
+      s.add_development_dependency(%q<sqlite3-ruby>, [">= 0"])
     else
+      s.add_dependency(%q<activerecord>, [">= 3.0.0.beta4"])
       s.add_dependency(%q<shoulda>, [">= 0"])
+      s.add_dependency(%q<sqlite3-ruby>, [">= 0"])
     end
   else
+    s.add_dependency(%q<activerecord>, [">= 3.0.0.beta4"])
     s.add_dependency(%q<shoulda>, [">= 0"])
+    s.add_dependency(%q<sqlite3-ruby>, [">= 0"])
   end
 end
 
