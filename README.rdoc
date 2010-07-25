@@ -1,6 +1,8 @@
 = convenient_scopes
 
-Description goes here.
+Dynamic scopes by convention for ActiveRecord 3.
+
+Pretty much the same API as searchlogic except it's compatible with ActiveRecord 3, unlike searchlogic as of now. The whole feature set of searchlogic isn't implemented yet in convenient_scopes though.
 
 == Note on Patches/Pull Requests
  
