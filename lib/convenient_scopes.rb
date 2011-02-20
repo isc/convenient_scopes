@@ -13,7 +13,7 @@ module ConvenientScopes
 
     def equals_scope name
       return unless (column = match_suffix_and_column_name name, %w(equals eq is))
-      lambda {|value| where(column => value)}
+      lambda {|value| unscoped.where(column => value)}
     end
 
     def does_not_equal_scope name
@@ -73,7 +73,7 @@ module ConvenientScopes
     def boolean_column_scope name
       return unless column_names.include? name.to_s
       return unless boolean_column? name
-      where(name => true)
+      unscoped.where(name => true)
     end
 
     def negative_boolean_column_scope name
@@ -81,7 +81,7 @@ module ConvenientScopes
       return unless str_name.gsub!(/^not_/, '')
       return unless column_names.include? str_name
       return unless boolean_column? str_name
-      where(str_name => false)
+      unscoped.where(str_name => false)
     end
 
   end
@@ -108,7 +108,7 @@ module ConvenientScopes
   
   def determine_order_scope_data name, direction
     if column_names.include? name.to_s
-      order("#{quoted_table_name}.#{name} #{direction}")
+      unscoped.order("#{quoted_table_name}.#{name} #{direction}")
     elsif assoc = (possible_association_for_scope name)
       next_scope = name.to_s.split("#{assoc.name}_").last.to_sym # age
       scope_arg = assoc.klass.determine_order_scope_data next_scope, direction
@@ -132,7 +132,7 @@ module ConvenientScopes
   def define_scope name
     [Conditions, Ordering].map(&:instance_methods).flatten.each do |scope_type|
       if scope_arg = (send scope_type.to_sym, name)
-        return scope_arg unless scope_arg.nil?
+        return scope_arg
       end
     end
     association_scope name
@@ -141,12 +141,12 @@ module ConvenientScopes
   def match_and_define_scope name, suffixes, sql_format, value_format = nil
     return unless (column = match_suffix_and_column_name name, suffixes)
     sql = formatted_sql column, sql_format
-    lambda {|value| where([sql, value_format ? (value_format % value) : value])}
+    lambda {|value| unscoped.where([sql, value_format ? (value_format % value) : value])}
   end
 
   def match_and_define_scope_without_value name, suffixes, sql_format
     return unless (column = match_suffix_and_column_name name, suffixes)
-    where(formatted_sql column, sql_format)
+    unscoped.where(formatted_sql column, sql_format)
   end
 
   def formatted_sql column, sql_format

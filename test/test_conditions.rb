@@ -14,6 +14,7 @@ class TestConditions < Test::Unit::TestCase
         User.blabla_eq('Bob')
       end
       assert_equal [@bob], User.pseudo_eq('Bob')
+      assert_equal [@slim], User.pseudo_eq('Slim')
       assert_equal [@slim], User.pseudo_is('Slim')
       assert_equal [@bob], User.first_name_is('Robert')
     end
@@ -64,6 +65,12 @@ class TestConditions < Test::Unit::TestCase
     should "boolean columns" do
       assert_equal [@bob], User.admin
       assert_equal [@slim], User.not_admin
+    end
+    
+    should "not mix up scopes" do
+      User.age_gt(0).pseudo_null
+      sql = User.pseudo_null.to_sql
+      assert_nil sql['age']
     end
     
   end
