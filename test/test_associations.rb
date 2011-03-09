@@ -10,6 +10,7 @@ class TestAssociations < Test::Unit::TestCase
       @slim = User.create :comments => [(Comment.new :body => 'Bye', :published => false, :created_at => 10.minutes.ago),
         (Comment.new :body => 'Hello', :published => true, :created_at => 2.days.ago)],
         :group => @dev_group
+      UserProfile.create :user => @slim, :email => 'slim@email.com', :birthdate => 25.years.ago
     end
 
     should "not catch everything" do
@@ -46,6 +47,14 @@ class TestAssociations < Test::Unit::TestCase
       Comment.scope :recent, Comment.created_at_after(1.hour.ago).created_at_not_nil
       assert_equal [@slim], User.comments_recent
       assert_equal [@dev_group], Group.users_comments_recent
+    end
+    
+    should "be able to handle double belongs_to association" do
+      assert_equal ['Bye', 'Hello'], Comment.user_group_name_is('Developers').map(&:body)
+    end
+    
+    should "handle associations with same prefix" do
+      assert_equal %w(Bye Hello), Comment.user_user_profile_email_is('slim@email.com').map(&:body)
     end
     
   end

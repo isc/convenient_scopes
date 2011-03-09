@@ -11,12 +11,16 @@ ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":me
 class User < ActiveRecord::Base
   has_many :comments
   belongs_to :group
+  belongs_to :user_profile
 end
 class Group < ActiveRecord::Base
   has_many :users
 end
 class Comment < ActiveRecord::Base
   belongs_to :user
+end
+class UserProfile < ActiveRecord::Base
+  has_one :user
 end
 
 class Test::Unit::TestCase
@@ -33,6 +37,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer :group_id, :age
     t.datetime :activated_at
     t.boolean :admin
+    t.integer :user_profile_id
     t.timestamps
   end
   create_table :groups do |t|
@@ -44,5 +49,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer :user_id
     t.boolean :published
     t.timestamps
+  end
+  create_table :user_profiles do |t|
+    t.date :birthdate
+    t.string :email
   end
 end

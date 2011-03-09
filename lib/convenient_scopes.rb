@@ -110,7 +110,7 @@ module ConvenientScopes
     if column_names.include? name.to_s
       unscoped.order("#{quoted_table_name}.#{name} #{direction}")
     elsif assoc = (possible_association_for_scope name)
-      next_scope = name.to_s.split("#{assoc.name}_").last.to_sym # age
+      next_scope = extract_next_scope name, assoc
       scope_arg = assoc.klass.determine_order_scope_data next_scope, direction
       scope_arg.is_a?(Array) ? [assoc.name] + scope_arg : [assoc.name, scope_arg] if scope_arg
     end    
@@ -120,13 +120,17 @@ module ConvenientScopes
 
   def association_scope name
     return unless assoc = (possible_association_for_scope name)
-    next_scope = name.to_s.split("#{assoc.name}_").last.to_sym
+    next_scope = extract_next_scope name, assoc
     scope_arg = (assoc.klass.define_scope next_scope) || assoc.klass.scopes[next_scope]
     scope_arg.is_a?(Array) ? [assoc.name] + scope_arg : [assoc.name, scope_arg] if scope_arg
   end
 
   def possible_association_for_scope name
     reflect_on_all_associations.detect {|assoc| name.to_s.starts_with? assoc.name.to_s}
+  end
+  
+  def extract_next_scope name, assoc
+    name.to_s.split(/^#{assoc.name}_/).last.to_sym
   end
   
   def define_scope name
