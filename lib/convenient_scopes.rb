@@ -70,6 +70,10 @@ module ConvenientScopes
       match_and_define_scope_without_value name, %w(not_null not_nil not_missing), "%s is not null"
     end
 
+    def between name
+      match_and_define_scope name, %w(between), "%s >= ? AND %s < ?"
+    end
+
     def boolean_column_scope name
       return unless column_names.include? name.to_s
       return unless boolean_column? name
@@ -83,29 +87,28 @@ module ConvenientScopes
       return unless boolean_column? str_name
       unscoped.where(str_name => false)
     end
-
   end
 
   include Conditions
 
   module Ordering
-    
+
     def ascend_by_scope name
       ordering_scope name, /^ascend_by_/, 'asc'
     end
-    
+
     def descend_by_scope name
       ordering_scope name, /^descend_by_/, 'desc'
     end
-    
+
   end
-  
+
   def ordering_scope name, prefix, direction
     str_name = name.to_s
     return unless str_name.gsub!(prefix, '')
     determine_order_scope_data str_name, direction
   end
-  
+
   def determine_order_scope_data name, direction
     if column_names.include? name.to_s
       unscoped.order("#{quoted_table_name}.#{name} #{direction}")
@@ -113,9 +116,9 @@ module ConvenientScopes
       next_scope = extract_next_scope name, assoc
       scope_arg = assoc.klass.determine_order_scope_data next_scope, direction
       scope_arg.is_a?(Array) ? [assoc.name] + scope_arg : [assoc.name, scope_arg] if scope_arg
-    end    
+    end
   end
-  
+
   include Ordering
 
   def association_scope name
@@ -128,11 +131,11 @@ module ConvenientScopes
   def possible_association_for_scope name
     reflect_on_all_associations.detect {|assoc| name.to_s.starts_with? assoc.name.to_s}
   end
-  
+
   def extract_next_scope name, assoc
     name.to_s.split(/^#{assoc.name}_/).last.to_sym
   end
-  
+
   def define_scope name
     [Conditions, Ordering].map(&:instance_methods).flatten.each do |scope_type|
       if scope_arg = (send scope_type.to_sym, name)
@@ -145,7 +148,19 @@ module ConvenientScopes
   def match_and_define_scope name, suffixes, sql_format, value_format = nil
     return unless (column = match_suffix_and_column_name name, suffixes)
     sql = formatted_sql column, sql_format
-    lambda {|value| unscoped.where([sql, value_format ? (value_format % value) : value])}
+    lambda do |value|
+      array = [sql]
+      if value_format
+        array << (value_format % value)
+      else
+        if value.is_a? Array
+          array += value
+        else
+          array << value
+        end
+      end
+      unscoped.where(array)
+    end
   end
 
   def match_and_define_scope_without_value name, suffixes, sql_format
@@ -154,7 +169,7 @@ module ConvenientScopes
   end
 
   def formatted_sql column, sql_format
-    sql = sql_format % "#{quoted_table_name}.#{column}"
+    sql = sql_format % (["#{quoted_table_name}.#{column}"] * sql_format.each("%s").count)
   end
 
   def match_suffix_and_column_name name, suffixes
@@ -179,7 +194,7 @@ module ConvenientScopes
       lambda {|*value| relation_or_proc.call(*value).joins joins_arg }
     end
   end
-  
+
 end
 
 ActiveRecord::Base.extend ConvenientScopes
