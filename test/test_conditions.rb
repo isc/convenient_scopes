@@ -75,6 +75,7 @@ class TestConditions < Test::Unit::TestCase
 
     should "between" do
       assert_equal [@bob], User.activated_at_between(40.hours.ago, 34.hours.ago)
+      assert_equal [], User.activated_at_between(40.hours.ago, 38.hours.ago)
     end
 
   end

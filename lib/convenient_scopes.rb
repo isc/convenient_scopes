@@ -148,19 +148,7 @@ module ConvenientScopes
   def match_and_define_scope name, suffixes, sql_format, value_format = nil
     return unless (column = match_suffix_and_column_name name, suffixes)
     sql = formatted_sql column, sql_format
-    lambda do |value|
-      array = [sql]
-      if value_format
-        array << (value_format % value)
-      else
-        if value.is_a? Array
-          array += value
-        else
-          array << value
-        end
-      end
-      unscoped.where(array)
-    end
+    lambda {|*value| unscoped.where([sql, value_format ? (value_format % value) : value].flatten) }
   end
 
   def match_and_define_scope_without_value name, suffixes, sql_format
