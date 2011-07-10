@@ -10,7 +10,7 @@ module ConvenientScopes
   end
 
   def define_scope name
-    ([Conditions, Ordering].map(&:instance_methods).flatten.inject nil do |memo, scope_type|
+    (ScopeDefinitions.instance_methods.inject nil do |memo, scope_type|
       memo ||= send scope_type.to_sym, name
     end) || (association_scope name)
   end
@@ -41,7 +41,7 @@ module ConvenientScopes
   
   class InvalidScopes < Exception ; end
 
-  module Conditions
+  module ScopeDefinitions
 
     SCOPE_DEFINITIONS = [ 
       [%w(does_not_equal doesnt_equal ne is_not), "%s != ?"],
@@ -62,6 +62,11 @@ module ConvenientScopes
       [%w(null nil missing), "%s is null"],
       [%w(not_null not_nil not_missing), "%s is not null"]
     ]
+    
+    ORDERING_SCOPE_DEFINITIONS = [
+      [/^ascend_by_/, 'asc'],
+      [/^descend_by_/, 'desc']
+    ]
 
     def scopes_with_value name
       SCOPE_DEFINITIONS.inject nil do |memo, definition|
@@ -75,6 +80,12 @@ module ConvenientScopes
       end
     end
 
+    def ordering_scopes name
+      ORDERING_SCOPE_DEFINITIONS.inject nil do |memo, definition|
+        memo ||= match_ordering_scope name, *definition
+      end
+    end
+
     def equals_scope name
       return unless (column = match_suffix_and_column_name name, %w(equals eq is))
       lambda {|value| unscoped.where(column => value)}
@@ -83,33 +94,18 @@ module ConvenientScopes
     def boolean_column_scopes name
       str_name = name.to_s
       value = !str_name.gsub!(/^not_/, '')
-      return unless boolean_column? str_name
-      unscoped.where(str_name => value)
+      unscoped.where(str_name => value) if boolean_column? str_name
     end
 
   end
 
-  include Conditions
+  include ScopeDefinitions
 
-  module Ordering
-
-    def ascend_by_scope name
-      ordering_scope name, /^ascend_by_/, 'asc'
-    end
-
-    def descend_by_scope name
-      ordering_scope name, /^descend_by_/, 'desc'
-    end
-
-  end
-
-  def ordering_scope name, prefix, direction
+  def match_ordering_scope name, prefix, direction
     str_name = name.to_s
     return unless str_name.gsub!(prefix, '')
     determine_order_scope_data str_name, direction
   end
-
-  include Ordering
 
   def association_scope name
     return unless assoc = (possible_association_for_scope name)
