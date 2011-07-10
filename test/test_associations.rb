@@ -14,10 +14,10 @@ class TestAssociations < Test::Unit::TestCase
     end
 
     should "not catch everything" do
-      assert_raise NoMethodError do
+      assert_raises NoMethodError do
         User.comment_body_is('Yo')
       end
-      assert_raise NoMethodError do
+      assert_raises NoMethodError do
         User.comments_synopsis_eq('Yo')
       end
     end

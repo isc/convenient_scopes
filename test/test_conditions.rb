@@ -10,7 +10,7 @@ class TestConditions < Test::Unit::TestCase
     end
 
     should "equals scope" do
-      assert_raise NoMethodError do
+      assert_raises NoMethodError do
         User.blabla_eq('Bob')
       end
       assert_equal [@bob], User.pseudo_eq('Bob')
