@@ -65,6 +65,12 @@ class TestConditions < Test::Unit::TestCase
     should "boolean columns" do
       assert_equal [@bob], User.admin
       assert_equal [@slim], User.not_admin
+      assert_raises NoMethodError do
+        User.not_age
+      end
+      assert_raises NoMethodError do
+        User.not_shablagoo
+      end
     end
 
     should "not mix up scopes" do
