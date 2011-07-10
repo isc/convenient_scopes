@@ -8,6 +8,21 @@ module ConvenientScopes
       super
     end
   end
+  
+  def search search_scopes
+    res = unscoped
+    search_scopes.each do |name, args|
+      if scopes.keys.include?(name.to_sym) || !respond_to?(name)
+        res = res.send name, args unless args == false
+      else
+        raise InvalidScopes
+      end
+    end
+    res
+  end
+  
+  class InvalidScopes < Exception
+  end
 
   module Conditions
 
