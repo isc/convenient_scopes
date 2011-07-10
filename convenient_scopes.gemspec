@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{convenient_scopes}
-  s.version = "0.6.0"
+  s.version = "0.7.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Ivan Schneider"]
-  s.date = %q{2011-03-22}
+  s.date = %q{2011-07-10}
   s.description = %q{Dynamic scopes by convention for ActiveRecord 3}
   s.email = %q{isc@massivebraingames.com}
   s.extra_rdoc_files = [
@@ -28,7 +28,8 @@ Gem::Specification.new do |s|
     "test/test_all_and_any_conditions.rb",
     "test/test_associations.rb",
     "test/test_conditions.rb",
-    "test/test_ordering.rb"
+    "test/test_ordering.rb",
+    "test/test_search_with_hash.rb"
   ]
   s.homepage = %q{http://github.com/isc/convenient_scopes}
   s.require_paths = ["lib"]
@@ -39,7 +40,8 @@ Gem::Specification.new do |s|
     "test/test_all_and_any_conditions.rb",
     "test/test_associations.rb",
     "test/test_conditions.rb",
-    "test/test_ordering.rb"
+    "test/test_ordering.rb",
+    "test/test_search_with_hash.rb"
   ]
 
   if s.respond_to? :specification_version then
