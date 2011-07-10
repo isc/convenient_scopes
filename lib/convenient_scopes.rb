@@ -3,10 +3,16 @@ module ConvenientScopes
   def method_missing(name, *args, &block)
     if scope_data = (define_scope name)
       scope name, convert_to_scope_arg(scope_data)
-      return send name, *args, &block
+      send name, *args, &block
     else
       super
     end
+  end
+
+  def define_scope name
+    ([Conditions, Ordering].map(&:instance_methods).flatten.inject nil do |memo, scope_type|
+      memo ||= send scope_type.to_sym, name
+    end) || (association_scope name)
   end
   
   def search search_scopes
@@ -21,16 +27,22 @@ module ConvenientScopes
     res
   end
   
-  class InvalidScopes < Exception
+  def determine_order_scope_data name, direction
+    if column_names.include? name.to_s
+      unscoped.order("#{quoted_table_name}.#{name} #{direction}")
+    elsif assoc = (possible_association_for_scope name)
+      next_scope = extract_next_scope name, assoc
+      scope_arg = assoc.klass.determine_order_scope_data next_scope, direction
+      scope_arg.is_a?(Array) ? [assoc.name] + scope_arg : [assoc.name, scope_arg] if scope_arg
+    end
   end
+  
+  private
+  
+  class InvalidScopes < Exception ; end
 
   module Conditions
 
-    def equals_scope name
-      return unless (column = match_suffix_and_column_name name, %w(equals eq is))
-      lambda {|value| unscoped.where(column => value)}
-    end
-    
     SCOPE_DEFINITIONS = [ 
       [%w(does_not_equal doesnt_equal ne is_not), "%s != ?"],
       [%w(less_than lt before), "%s < ?"],
@@ -45,22 +57,27 @@ module ConvenientScopes
       [%w(not_end_with does_not_end_with doesnt_end_with), "%s not like ?", "%%%s"],
       [%w(between), "%s >= ? AND %s < ?"]
     ]
-    
-    def scopes_with_values name
-      SCOPE_DEFINITIONS.each do |definition|
-        if scope_arg = (match_and_define_scope name, *definition)
-          return scope_arg
-        end
+
+    SCOPE_WITHOUT_VALUE_DEFINITIONS = [
+      [%w(null nil missing), "%s is null"],
+      [%w(not_null not_nil not_missing), "%s is not null"]
+    ]
+
+    def scopes_with_value name
+      SCOPE_DEFINITIONS.inject nil do |memo, definition|
+        memo ||= match_and_define_scope name, *definition
       end
-      nil
     end
     
-    def null_scope name
-      match_and_define_scope_without_value name, %w(null nil missing), "%s is null"
+    def scopes_without_value name
+      SCOPE_WITHOUT_VALUE_DEFINITIONS.inject nil do |memo, definition|
+        memo ||= match_and_define_scope_without_value name, *definition
+      end
     end
 
-    def not_null_scope name
-      match_and_define_scope_without_value name, %w(not_null not_nil not_missing), "%s is not null"
+    def equals_scope name
+      return unless (column = match_suffix_and_column_name name, %w(equals eq is))
+      lambda {|value| unscoped.where(column => value)}
     end
 
     def boolean_column_scope name
@@ -70,8 +87,7 @@ module ConvenientScopes
 
     def negative_boolean_column_scope name
       str_name = name.to_s
-      return unless str_name.gsub!(/^not_/, '')
-      return unless boolean_column? str_name
+      return unless str_name.gsub!(/^not_/, '') && boolean_column?(str_name)
       unscoped.where(str_name => false)
     end
   end
@@ -96,16 +112,6 @@ module ConvenientScopes
     determine_order_scope_data str_name, direction
   end
 
-  def determine_order_scope_data name, direction
-    if column_names.include? name.to_s
-      unscoped.order("#{quoted_table_name}.#{name} #{direction}")
-    elsif assoc = (possible_association_for_scope name)
-      next_scope = extract_next_scope name, assoc
-      scope_arg = assoc.klass.determine_order_scope_data next_scope, direction
-      scope_arg.is_a?(Array) ? [assoc.name] + scope_arg : [assoc.name, scope_arg] if scope_arg
-    end
-  end
-
   include Ordering
 
   def association_scope name
@@ -121,15 +127,6 @@ module ConvenientScopes
 
   def extract_next_scope name, assoc
     name.to_s.split(/^#{assoc.name}_/).last.to_sym
-  end
-
-  def define_scope name
-    [Conditions, Ordering].map(&:instance_methods).flatten.each do |scope_type|
-      if scope_arg = (send scope_type.to_sym, name)
-        return scope_arg
-      end
-    end
-    association_scope name
   end
 
   def match_and_define_scope name, suffixes, sql_format, value_format = nil
