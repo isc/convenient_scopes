@@ -80,16 +80,13 @@ module ConvenientScopes
       lambda {|value| unscoped.where(column => value)}
     end
 
-    def boolean_column_scope name
-      return unless boolean_column? name
-      unscoped.where(name => true)
+    def boolean_column_scopes name
+      str_name = name.to_s
+      value = !str_name.gsub!(/^not_/, '')
+      return unless boolean_column? str_name
+      unscoped.where(str_name => value)
     end
 
-    def negative_boolean_column_scope name
-      str_name = name.to_s
-      return unless str_name.gsub!(/^not_/, '') && boolean_column?(str_name)
-      unscoped.where(str_name => false)
-    end
   end
 
   include Conditions
