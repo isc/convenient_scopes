@@ -140,7 +140,7 @@ module ConvenientScopes
   end
 
   def match_suffix_and_column_name name, suffixes
-    str_name = name.to_s
+    str_name = name.to_s.dup
     regexp_str = suffixes.map {|suffix| "(_#{suffix})"}.join('|') + '$'
     return unless str_name.gsub!(Regexp.new(regexp_str), '')
     return unless column_names.include? str_name
