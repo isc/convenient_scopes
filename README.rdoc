@@ -16,4 +16,4 @@ Pretty much the same API as searchlogic except it's compatible with ActiveRecord
 
 == Copyright
 
-Copyright (c) 2010 Ivan Schneider. See LICENSE for details.
+Copyright (c) 2011 Ivan Schneider. See LICENSE for details.
