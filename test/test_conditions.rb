@@ -73,6 +73,20 @@ class TestConditions < Test::Unit::TestCase
       end
     end
 
+    should "blank and present scopes" do
+      u = User.create :pseudo => ''
+      assert_equal [u], User.pseudo_blank
+      assert_equal [u], User.pseudo_not_present
+      u.update_attribute :pseudo, nil
+      assert_equal [u], User.pseudo_blank
+      assert_equal [u], User.pseudo_not_present
+      assert_equal 2, User.pseudo_not_blank.count
+      assert_equal 2, User.pseudo_present.count
+      u.update_attribute :pseudo, ''
+      assert_equal 2, User.pseudo_not_blank.count
+      assert_equal 2, User.pseudo_present.count
+    end
+
     should "not mix up scopes" do
       User.age_gt(0).pseudo_null
       sql = User.pseudo_null.to_sql

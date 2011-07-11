@@ -60,7 +60,9 @@ module ConvenientScopes
 
     SCOPE_WITHOUT_VALUE_DEFINITIONS = [
       [%w(null nil missing), "%s is null"],
-      [%w(not_null not_nil not_missing), "%s is not null"]
+      [%w(not_null not_nil not_missing), "%s is not null"],
+      [%w(blank not_present), "%s is null OR %s = ''"],
+      [%w(not_blank present), "%s is not null AND %s <> ''"]
     ]
     
     ORDERING_SCOPE_DEFINITIONS = [
