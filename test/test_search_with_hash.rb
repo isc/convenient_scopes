@@ -36,6 +36,10 @@ class TestSearchWithHash < Test::Unit::TestCase
       assert_equal 2, User.count
     end
     
+    should "not mess up previous scoping" do
+      assert_equal [], User.where(:age => 37).search(:first_name_is => 'Angelo')
+    end
+    
   end
   
 end

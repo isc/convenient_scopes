@@ -16,7 +16,7 @@ module ConvenientScopes
   end
   
   def search search_scopes
-    res = unscoped
+    res = scoped
     search_scopes.each do |name, args|
       if scopes.keys.include?(name.to_sym) || !respond_to?(name)
         res = res.send name, args unless args == false
