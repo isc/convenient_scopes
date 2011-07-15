@@ -154,12 +154,17 @@ module ConvenientScopes
   def convert_to_scope_arg scope_data
     return scope_data unless scope_data.is_a? Array
     relation_or_proc = scope_data.pop
-    joins_arg = (scope_data.size == 1) ? scope_data.first : {scope_data.first => scope_data.last}
+    joins_arg = determine_joins_arg scope_data
     if relation_or_proc.is_a? ActiveRecord::Relation
       relation_or_proc.joins joins_arg
     else
       lambda {|*value| relation_or_proc.call(*value).joins joins_arg }
     end
+  end
+  
+  def determine_joins_arg scope_data
+    return scope_data.first if scope_data.size == 1
+    {scope_data.shift => determine_joins_arg(scope_data)}
   end
 
 end

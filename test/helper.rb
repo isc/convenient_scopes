@@ -18,9 +18,13 @@ class Group < ActiveRecord::Base
 end
 class Comment < ActiveRecord::Base
   belongs_to :user
+  belongs_to :post
 end
 class UserProfile < ActiveRecord::Base
   has_one :user
+end
+class Post < ActiveRecord::Base
+  has_many :comments
 end
 
 class Test::Unit::TestCase
@@ -46,12 +50,16 @@ ActiveRecord::Schema.define(:version => 1) do
   end
   create_table :comments do |t|
     t.string :body
-    t.integer :user_id
+    t.integer :user_id, :post_id
     t.boolean :published
     t.timestamps
   end
   create_table :user_profiles do |t|
     t.date :birthdate
     t.string :email
+  end
+  create_table :posts do |t|
+    t.string :title, :author
+    t.text :body
   end
 end

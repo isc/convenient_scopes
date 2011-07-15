@@ -43,6 +43,10 @@ class TestAssociations < Test::Unit::TestCase
       assert_equal [@dev_group], Group.users_comments_published
     end
     
+    should "also handle three levels of association" do
+      assert_equal 3, Post.comments_user_user_profile_email_is('blbabla').to_sql.scan('INNER JOIN').size
+    end
+    
     should "be able to leverage a named scope on an association" do
       Comment.scope :recent, Comment.created_at_after(1.hour.ago).created_at_not_nil
       assert_equal [@slim], User.comments_recent
