@@ -18,13 +18,18 @@ module ConvenientScopes
   def search search_scopes
     res = scoped
     search_scopes.each do |name, args|
-      if scopes.keys.include?(name.to_sym) || !respond_to?(name)
+      if scopes.keys.include?(name.to_sym) || ar_relation_methods?(name) || !respond_to?(name)
         res = res.send name, args unless args == false
       else
         raise InvalidScopes
       end
     end
     res
+  end
+  
+  def ar_relation_methods? name
+    (ActiveRecord::Relation::MULTI_VALUE_METHODS + ActiveRecord::Relation::SINGLE_VALUE_METHODS +
+    ActiveRecord::Relation::ASSOCIATION_METHODS).include? name
   end
   
   def determine_order_scope_data name, direction

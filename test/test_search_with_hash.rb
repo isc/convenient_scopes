@@ -40,6 +40,10 @@ class TestSearchWithHash < Test::Unit::TestCase
       assert_equal [], User.where(:age => 37).search(:first_name_is => 'Angelo')
     end
     
+    should "be able to pass common ar methods in search" do
+      assert_equal [@bob], User.search(:where => "age = 37")
+    end
+    
   end
   
 end
