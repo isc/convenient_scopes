@@ -141,7 +141,7 @@ module ConvenientScopes
   end
 
   def formatted_sql column, sql_format
-    sql = sql_format % (["#{quoted_table_name}.#{column}"] * sql_format.each("%s").count)
+    sql = sql_format % (["#{quoted_table_name}.#{column}"] * sql_format.scan("%s").count)
   end
 
   def match_suffix_and_column_name name, suffixes
