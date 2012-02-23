@@ -31,7 +31,8 @@ module ConvenientScopes
     end
   end
 
-  def define_scope name, unscoped
+  def define_scope name, unscoped = nil
+    unscoped ||= self.unscoped
     (ScopeDefinitions.instance_methods.inject nil do |memo, scope_type|
       memo ||= send scope_type.to_sym, name, unscoped
     end) || (association_scope name, unscoped)
