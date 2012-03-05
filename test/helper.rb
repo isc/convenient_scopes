@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'bundler'
 require 'logger'
-Bundler.require
+Bundler.require :default, :development
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
